@@ -97,7 +97,7 @@ class PlayfairApp:
             self.file_name.config(text="Txt File : Empty")
 
     def save_file(self):
-        encrypted_text = self.text.get("1.0", "end-1c").strip()
+        encrypted_text = self.output_text.get("1.0", "end-1c").strip()
 
         file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
 

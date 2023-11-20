@@ -1,4 +1,4 @@
-('D:\\EternityBee\\Project\\cryptoPython\\build\\main\\PYZ-00.pyz',
+('D:\\EternityBee\\Project\\PlayFair-Cipher-App\\build\\main\\PYZ-00.pyz',
  [('_compat_pickle', 'D:\\Python\\Lib\\_compat_pickle.py', 'PYMODULE'),
   ('_compression', 'D:\\Python\\Lib\\_compression.py', 'PYMODULE'),
   ('_py_abc', 'D:\\Python\\Lib\\_py_abc.py', 'PYMODULE'),
