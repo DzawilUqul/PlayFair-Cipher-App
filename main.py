@@ -1,7 +1,11 @@
 import os
+import threading
 import tkinter as tk
 from tkinter import filedialog, ttk
 from tkinter import messagebox
+
+from pydrive.drive import GoogleDrive
+from pydrive.auth import GoogleAuth
 
 
 class PlayfairApp:
@@ -71,6 +75,9 @@ class PlayfairApp:
         calculate_button = tk.Button(subWindowFrame4, text="Calculate", command=self.calculate)
         calculate_button.pack(side="left", fill='both', expand=True, pady=5)
 
+        upload_button = tk.Button(subWindowFrame4, text="Upload G-Drive", command=self.upload_file)
+        upload_button.pack(side="left", fill='both', expand=True, pady=5)
+
         save_button = tk.Button(subWindowFrame4, text="Save File", command=self.save_file)
         save_button.pack(side="left", fill='both', expand=True, pady=5)
 
@@ -96,15 +103,53 @@ class PlayfairApp:
         else:
             self.file_name.config(text="Txt File : Empty")
 
+    def upload_file(self):
+        if self.output_text is None:
+            tk.messagebox.showerror("Error", "Please encrypt or decrypt the text first!")
+            return
+        else:
+            # Get the encrypted text from the output_text widget
+            encrypted_text = self.output_text.get("1.0", "end-1c").strip()
+
+            # Check if the text is not empty
+            if encrypted_text:
+                # Start a new thread for Google Drive authentication and file upload
+                upload_thread = threading.Thread(target=self.upload_to_google_drive, args=(encrypted_text,))
+                upload_thread.start()
+
+    def upload_to_google_drive(self, encrypted_text):
+        try:
+            # Authenticate first
+            gauth = GoogleAuth()
+            gauth.LocalWebserverAuth()
+
+            # Create a GoogleDrive instance
+            drive = GoogleDrive(gauth)
+
+            # Create a file on Google Drive
+            drive_file = drive.CreateFile({'title': 'Playfair Cipher.txt', 'content': encrypted_text})
+            drive_file.SetContentString(encrypted_text)
+            drive_file.Upload()
+
+            # Show success message
+            tk.messagebox.showinfo("File Uploaded", "File uploaded successfully!")
+        except Exception as e:
+            # Show an error message
+            tk.messagebox.showerror("Error", f"Error uploading file: {str(e)}")
+
     def save_file(self):
-        encrypted_text = self.output_text.get("1.0", "end-1c").strip()
+        if self.output_text is None:
+            tk.messagebox.showerror("Error", "Please encrypt or decrypt the text first!")
+            return
+        else:
+            encrypted_text = self.output_text.get("1.0", "end-1c").strip()
 
-        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+            file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
 
-        if file_path:
-            with open(file_path, "w") as file:
-                file.write(encrypted_text)
-            tk.messagebox.showinfo("File Saved", "File saved successfully!")
+            if file_path:
+                with open(file_path, "w") as file:
+                    file.write(encrypted_text)
+                tk.messagebox.showinfo("File Saved", "File saved successfully!")
 
     def repack_window_frame34(self):
         self.window_frame4.pack_forget()
@@ -240,7 +285,6 @@ class PlayfairApp:
         msg = msg.lower()
 
         formatted_msg = self.clean_text(msg)
-        print(formatted_msg)
 
         # Add 'z' if the length of the message is odd
         i = 1
@@ -251,7 +295,6 @@ class PlayfairApp:
 
         if len(formatted_msg) % 2 != 0:
             formatted_msg += 'z'
-        print(formatted_msg)
         return formatted_msg
 
     def format_message_decrypt(self, msg):
@@ -313,7 +356,6 @@ class PlayfairApp:
         self.matrix(mat)
 
         ciphertext_formatted = self.format_message_decrypt(ciphertext)
-        print(ciphertext_formatted)
 
         plaintext = ''
         i = 0
